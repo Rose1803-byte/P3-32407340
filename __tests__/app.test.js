@@ -1,64 +1,34 @@
-// Archivo app.js corregido para leer el puerto de Render.com
+const request = require('supertest');
+const app = require("../src/app");
 
-const express = require('express');
-const app = express();
-
-// IMPORTANTE: Render asigna el puerto mediante la variable de entorno PORT.
-// Si PORT existe, úsalo. Si no (como en desarrollo local), usa 3000.
-const port = process.env.PORT || 3000;
-
-// Middleware y configuración estándar de Express (asumiendo que estaban aquí)
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade'); 
-// etc.
-
-// =========================================================================
-// RUTAS DE LA API (Debes asegurarte de tener la ruta /about y /ping)
-// =========================================================================
-
-// Ruta de Salud/Status (Paso 1)
-app.get('/ping', (req, res) => {
-    res.status(200).json({ status: 'ok' });
-});
-
-// Ruta /about con datos del estudiante (Paso 2)
-app.get('/about', (req, res) => {
-    // Tus datos personales
-    const studentData = {
-        // CORREGIDO: Usando 'nombreCompleto' (con C mayúscula) para coincidir con la prueba.
-        nombreCompleto: "Roselyn", 
-        cedula: "32407340",
-        seccion: "Seccion NNN", // Asegúrate de que esta sección sea correcta
-        // Puedes agregar más campos si tu asignación lo requiere
-    };
-
-    // Formato JSend
-    res.json({
-        status: "success",
-        data: studentData
+describe('GET','ping', () => {
+    
+    test('GET /ping should respond with status code 200 (OK)', async () => {
+        const response = await request(app).get('/ping');
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual({}); 
     });
-});
 
-// Manejador de ruta no encontrada (404)
-app.use((req, res, next) => {
-    // Nota: Aunque la prueba que enviaste espera 'error', JSend usa 'fail' para errores del cliente
-    // y 'error' para errores del servidor. Usaremos 'fail' para 404.
-    res.status(404).json({ 
-        status: "fail", // Cambiado a 'fail' para seguir el estándar JSend
-        data: {
-            message: "Ruta no encontrada (Not Found)"
-        }
+
+    test('GET /about should return student data in JSend format', async () => {
+        const response = await request(app).get('/about');
+        
+    
+        expect(response.statusCode).toBe(200);
+        
+
+        expect(response.body.status).toBe('success');
+        
+
+        expect(response.body.data).toBeDefined();
+        
+
+        expect(response.body.data.nombreCompleto).toBeDefined();
+        expect(response.body.data.cedula).toBeDefined();
+        expect(response.body.data.seccion).toBeDefined();
     });
-});
 
-// =========================================================================
-// INICIO DEL SERVIDOR
-// =========================================================================
-
-// Ahora usamos la variable 'port' que toma el valor de process.env.PORT
-app.listen(port, () => {
-    console.log(`Express server listening on port ${port}`);
-});
-
-// Exporta la aplicación para las pruebas (Supertest)
-module.exports = app;
+    test('GET to a non-existent route should return 404 (Not Found)', async () => {
+        const response = await request(app).get('/a-non-existent-route');
+        expect(response.statusCode).toBe(404);
+        
