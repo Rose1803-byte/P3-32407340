@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require("../src/app");
-describe('Pruebas de la API del Proyecto P3', () => {
+describe('Pruebas de la API del Proyecto P3'), () => {
     
 
     test('GET /ping should respond with status code 200 (OK)', async () => {
@@ -14,9 +14,14 @@ describe('Pruebas de la API del Proyecto P3', () => {
         const response = await request(app).get('/about');
         
         
+
+    test('GET /about should return student data in JSend format', async () => {
+        const response = await request(app).get('/about');
+        
+    
         expect(response.statusCode).toBe(200);
         
-        // 2. Check JSend format: status must be 'success'
+
         expect(response.body.status).toBe('success');
         
        
@@ -24,6 +29,11 @@ describe('Pruebas de la API del Proyecto P3', () => {
         
         
         expect(response.body.data.nombrecompleto).toBeDefined();
+
+        expect(response.body.data).toBeDefined();
+        
+
+        expect(response.body.data.nombreCompleto).toBeDefined();
         expect(response.body.data.cedula).toBeDefined();
         expect(response.body.data.seccion).toBeDefined();
     });
@@ -37,3 +47,4 @@ describe('Pruebas de la API del Proyecto P3', () => {
         expect(response.body.status).toBe('error');
     });
 });
+}
