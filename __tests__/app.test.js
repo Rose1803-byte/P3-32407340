@@ -1,50 +1,42 @@
 const request = require('supertest');
-const app = require("../src/app");
-describe('Pruebas de la API del Proyecto P3'), () => {
-    
+const {app} = require('../routes/app'); // Corregido: Importa desde la raíz del proyecto
 
-    test('GET /ping should respond with status code 200 (OK)', async () => {
-        const response = await request(app).get('/ping');
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toEqual({}); 
-    });
+describe('Pruebas de la API Base (Task 0)', () => {
 
-    
-    test('GET /about should return student data in JSend format', async () => {
-        const response = await request(app).get('/about');
-        
-        
+  test('GET /ping debería responder con código 200 (OK)', async () => {
+    const response = await request(app).get('/ping');
+    expect(response.statusCode).toBe(200);
+    // Verificar que la respuesta sea JSON con status 'ok' según la última corrección de app.js
+    expect(response.headers['content-type']).toMatch(/json/);
+    expect(response.body).toEqual({ status: 'ok' });
+  });
 
-    test('GET /about should return student data in JSend format', async () => {
-        const response = await request(app).get('/about');
-        
-    
-        expect(response.statusCode).toBe(200);
-        
+  test('GET /about debería devolver los datos del estudiante en formato JSend', async () => {
+    const response = await request(app).get('/about');
 
-        expect(response.body.status).toBe('success');
-        
-       
-        expect(response.body.data).toBeDefined();
-        
-        
-        expect(response.body.data.nombrecompleto).toBeDefined();
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toMatch(/json/);
 
-        expect(response.body.data).toBeDefined();
-        
+    // Verificar estructura JSend
+    expect(response.body.status).toBe('success');
+    expect(response.body.data).toBeDefined();
 
-        expect(response.body.data.nombreCompleto).toBeDefined();
-        expect(response.body.data.cedula).toBeDefined();
-        expect(response.body.data.seccion).toBeDefined();
-    });
+    // Verificar campos dentro de data
+    expect(response.body.data.nombreCompleto).toBeDefined();
+    expect(response.body.data.cedula).toBeDefined();
+    expect(response.body.data.seccion).toBeDefined();
+  });
 
-    
-    test('GET to a non-existent route should return 404 (Not Found)', async () => {
-        const response = await request(app).get('/a-non-existent-route');
-        expect(response.statusCode).toBe(404);
-        
-       
-        expect(response.body.status).toBe('error');
-    });
+  test('GET a una ruta no existente debería devolver código 404 (Not Found) en formato JSend', async () => {
+    const response = await request(app).get('/ruta-que-no-existe');
+    expect(response.statusCode).toBe(404);
+    expect(response.headers['content-type']).toMatch(/json/);
+
+    // Verificar estructura JSend para errores 'fail'
+    expect(response.body.status).toBe('fail');
+    expect(response.body.data).toBeDefined();
+    expect(response.body.data.message).toContain('Ruta no encontrada'); // O el mensaje exacto de tu manejador 404
+  });
+
 });
-}
+
