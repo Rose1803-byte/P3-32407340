@@ -1,6 +1,6 @@
 // __tests__/auth.test.js
 const request = require('supertest');
-const app = require('../app'); // ahora la app se exporta desde la raíz
+const app = require('../app'); 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { sequelize, User } = require('../models');
@@ -12,35 +12,30 @@ const TEST_USER = {
     nombreCompleto: "Usuario de Prueba"
 };
 
-// =========================================================================
-// SETUP: Inicializar y limpiar la base de datos antes de todas las pruebas
-// =========================================================================
+
 beforeAll(async () => {
-    // Asegurar que Sequelize inicializó y crear las tablas vacías solo una vez
+   
     try {
-        await sequelize.sync({ force: true }); // recrea tablas vacías
+        await sequelize.sync({ force: true }); 
     } catch (e) {
         console.error('Error in beforeAll sequelize.sync:', e.message);
         throw e;
     }
 });
 
-// Al final de todas las pruebas, cerramos la conexión a la DB
+
 afterAll(async () => {
     try {
         await sequelize.close();
     } catch (e) {
-        // ignorar
+        
     }
 });
 
 
-// =========================================================================
-// PRUEBAS DE AUTENTICACIÓN (Task 1: /api/auth/register, /api/auth/login, /api/auth/me)
-// =========================================================================
 
 describe('Task 1: Autenticación (/api/auth)', () => {
-    let authToken = null; // Variable para almacenar el token después del login
+    let authToken = null; 
 
     test('POST /api/auth/register - 1: Registro Exitoso (201)', async () => {
         const response = await request(app)
@@ -58,12 +53,12 @@ describe('Task 1: Autenticación (/api/auth)', () => {
     test('POST /api/auth/register - 2: Email Duplicado (409)', async () => {
         const response = await request(app)
             .post('/api/auth/register')
-            .send(TEST_USER) // Intenta registrar el mismo usuario otra vez
+            .send(TEST_USER) 
             .expect('Content-Type', /json/)
             .expect(409);
 
     expect(response.body.status).toBe('fail');
-    // Mensaje flexible: puede contener 'email' o 'correo' pero debe indicar que está registrado
+  
     expect(response.body.data.message.toLowerCase()).toContain('registrad');
     });
 
@@ -80,12 +75,10 @@ describe('Task 1: Autenticación (/api/auth)', () => {
         expect(response.body.status).toBe('success');
         expect(response.body.data.token).toBeDefined();
 
-    // Guardamos el token para las pruebas protegidas posteriores
     authToken = response.body.data.token;
 
-    // Verificar el contenido del token (opcional)
     const decoded = jwt.decode(authToken);
-    expect(decoded.id).toBeDefined(); // usamos { id, email } en el payload
+    expect(decoded.id).toBeDefined(); 
     expect(decoded.email).toBe(TEST_USER.email);
     });
 
@@ -111,7 +104,7 @@ describe('Task 1: Autenticación (/api/auth)', () => {
     });
 
     test('GET /api/auth/me - 6: Obtener Perfil Exitosamente (200)', async () => {
-        // Asegurarse de que el token se obtuvo en la prueba de login
+        
         if (!authToken) {
             throw new Error("El token de autenticación no se obtuvo en la prueba de login.");
         }
@@ -129,10 +122,6 @@ describe('Task 1: Autenticación (/api/auth)', () => {
 });
 
 
-// =========================================================================
-// PRUEBAS CRUD PROTEGIDAS (/api/users)
-// =========================================================================
-
 describe('Task 1: CRUD de Usuarios Protegido (/api/users)', () => {
     let token;
     let newUserId;
@@ -140,9 +129,9 @@ describe('Task 1: CRUD de Usuarios Protegido (/api/users)', () => {
     const CRUD_USER_PASSWORD = "CrudPassword123";
     const CRUD_USER_NAME = "Usuario CRUD";
 
-    // Obtener token antes de correr las pruebas CRUD
+   
     beforeAll(async () => {
-        // Crear un usuario de prueba para obtener un token
+    
         try {
             await User.destroy({ where: { email: CRUD_USER_EMAIL } });
 
@@ -164,13 +153,12 @@ describe('Task 1: CRUD de Usuarios Protegido (/api/users)', () => {
         }
     });
 
-    // Pruebas de acceso sin token
     test.each([
         ['GET', '/api/users'],
-        ['GET', `/api/users/9999`], // ID ficticio
+        ['GET', `/api/users/9999`], 
         ['POST', '/api/users'],
-        ['PUT', `/api/users/9999`], // ID ficticio
-        ['DELETE', `/api/users/9999`] // ID ficticio
+        ['PUT', `/api/users/9999`], 
+        ['DELETE', `/api/users/9999`] 
     ])('Rutas CRUD fallan sin token (%s %s)', async (method, path) => {
         const req = request(app);
         let response;
@@ -196,7 +184,7 @@ describe('Task 1: CRUD de Usuarios Protegido (/api/users)', () => {
 
         expect(response.body.status).toBe('success');
         expect(Array.isArray(response.body.data.users)).toBe(true);
-        // Debe haber al menos 1 usuario (el de CRUD creado en setup)
+       
         expect(response.body.data.users.length).toBeGreaterThanOrEqual(1);
     });
 
@@ -213,7 +201,7 @@ describe('Task 1: CRUD de Usuarios Protegido (/api/users)', () => {
         const response = await request(app).put(`/api/users/${newUserId}`).set('Authorization', `Bearer ${token}`).send({ nombreCompleto: newName }).expect(200);
         expect(response.body.status).toBe('success');
 
-        // Verificamos el cambio reflejado en la DB
+    
         const check = await User.findByPk(newUserId);
         expect(check.nombreCompleto).toBe(newName);
     });
@@ -223,7 +211,7 @@ describe('Task 1: CRUD de Usuarios Protegido (/api/users)', () => {
 
         expect(response.body.status).toBe('success');
 
-        // Verificamos que el usuario ya no existe en la DB
+    
         const check = await User.findByPk(newUserId);
         expect(check).toBeNull();
     });
