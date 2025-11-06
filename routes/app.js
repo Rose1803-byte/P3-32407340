@@ -1,5 +1,6 @@
+// app.js
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const express = require('express');
 const path = require('path');
@@ -10,9 +11,16 @@ const createError = require('http-errors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 
+// Asumo que estas rutas existen en tu estructura:
 const { initDB } = require('../models');
-const {router: authRouter} = require('./auth');
+const { router: authRouter } = require('./auth');
 const usersRouter = require('./users');
+
+// --- Nuevas Rutas (Task 2) ---
+const categoryRouter = require('./category.routes');
+const tagRouter = require('./tag.routes');
+const productRouter = require('./product.routes');
+const productPublicRouter = require('./productPublic.routes');
 
 let app = express();
 
@@ -22,21 +30,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Inicializar Sequelize (authenticate + sync)
-async function initializeSequelize() {
-    try {
-        await initDB({ sync: true });
-    } catch (err) {
-        console.error('No se pudo inicializar Sequelize:', err);
-        process.exit(1);
-    }
-}
+// Nota: la inicialización de Sequelize se delega a quien arranque el servidor
+// (por ejemplo bin/www) para evitar sincronizaciones automáticas durante los tests.
 
-initializeSequelize();
 
+// --- Montaje de Rutas ---
 app.use('/api/auth', authRouter); 
-app.use('/api/users', usersRouter); 
+app.use('/api/users', usersRouter);
+// Montaje de las nuevas rutas Task 2
+app.use('/api/categories', categoryRouter);
+app.use('/api/tags', tagRouter);
+app.use('/api/products', productRouter);
+// Ruta pública para Self-Healing y listado público
+app.use('/p', productPublicRouter);
 
+
+// --- Rutas Base (Task 0) ---
 app.get('/ping', (req, res) => res.status(200).json({ status: 'ok' }));
 app.get('/about', (req, res) => {
     res.json({
@@ -50,19 +59,25 @@ app.get('/about', (req, res) => {
 });
 
 
-// Configuración de Swagger
+// --- Configuración de Swagger ---
 const swaggerOptions = {
+    // ... (Tu objeto de configuración Swagger original)
     swaggerDefinition: {
         openapi: '3.0.0',
         info: {
-            title: 'API Documentation',
-            version: '1.0.0',
-            description: 'API para gestión de usuarios y autenticación'
+            title: 'API Documentation (Task 2)',
+            version: '2.0.0',
+            description: 'API para gestión de usuarios y productos (Zapatillas Deportivas)'
         },
+        // ... (Añadir la URL para la ruta Self-Healing)
         servers: [
             {
-                url: 'http://localhost:3000',
-                description: 'Servidor de desarrollo'
+                url: '/api',
+                description: 'Servidor de API principal'
+            },
+            {
+                url: '/p',
+                description: 'Ruta pública de Self-Healing'
             }
         ],
         components: {
@@ -83,6 +98,7 @@ const swaggerSpecs = swaggerJSDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 
+// --- Manejo de Errores ---
 app.use(function(req, res, next) {
     res.status(404).json({
         status: "fail",
@@ -103,4 +119,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-module.exports = {app}
+module.exports = {app, initDB}
