@@ -2,7 +2,7 @@
 const request = require('supertest');
 const app = require('../app'); 
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { initDB, sequelize, User } = require('../models');
 
 // Datos de prueba

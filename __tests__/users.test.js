@@ -2,7 +2,7 @@
 const request = require('supertest');
 const app = require('../app');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { initDB, sequelize, User } = require('../models');
 
 // Datos de prueba consistentes con el modelo de User
@@ -18,9 +18,9 @@ const TEST_USER_2 = {
     nombreCompleto: "Usuario de Prueba Dos"
 };
 
-// =========================================================================
+
 // SETUP: Inicializar y limpiar la base de datos antes de todas las pruebas
-// =========================================================================
+
 beforeAll(async () => {
     try {
         // Usar initDB con force para asegurar limpieza en tests
@@ -39,9 +39,9 @@ afterAll(async () => {
     }
 });
 
-// =========================================================================
+
 // PRUEBAS PARA EL CRUD DE USUARIOS (/api/users)
-// =========================================================================
+
 
 describe('CRUD de Usuarios (/api/users)', () => {
     let token1, token2;
@@ -77,9 +77,9 @@ describe('CRUD de Usuarios (/api/users)', () => {
         }
     });
 
-    // =========================================================================
+
     // PRUEBAS DE AUTORIZACIÓN - Sin token
-    // =========================================================================
+
     describe('Autorización - Sin token', () => {
         test('GET /api/users - Sin token (401)', async () => {
             const response = await request(app)
@@ -133,9 +133,9 @@ describe('CRUD de Usuarios (/api/users)', () => {
         });
     });
 
-    // =========================================================================
+   
     // PRUEBAS GET - Obtener usuarios
-    // =========================================================================
+    
     describe('GET /api/users - Obtener lista de usuarios', () => {
         test('Obtener lista exitosamente (200)', async () => {
             const response = await request(app)
@@ -180,9 +180,9 @@ describe('CRUD de Usuarios (/api/users)', () => {
         });
     });
 
-    // =========================================================================
+    
     // PRUEBAS GET /:id - Obtener usuario específico
-    // =========================================================================
+    
     describe('GET /api/users/:id - Obtener usuario específico', () => {
         test('Obtener usuario existente exitosamente (200)', async () => {
             const response = await request(app)
@@ -211,9 +211,9 @@ describe('CRUD de Usuarios (/api/users)', () => {
         });
     });
 
-    // =========================================================================
+    
     // PRUEBAS POST - Crear usuario
-    // =========================================================================
+
     describe('POST /api/users - Crear usuario', () => {
         test('Crear usuario exitosamente (201)', async () => {
             const newUser = {
@@ -309,9 +309,6 @@ describe('CRUD de Usuarios (/api/users)', () => {
         });
     });
 
-    // =========================================================================
-    // PRUEBAS PUT /:id - Actualizar usuario
-    // =========================================================================
     describe('PUT /api/users/:id - Actualizar usuario', () => {
         test('Actualizar propio perfil exitosamente (200)', async () => {
             const updateData = {
