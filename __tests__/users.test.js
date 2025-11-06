@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../app');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { sequelize, User } = require('../models');
+const { initDB, sequelize, User } = require('../models');
 
 // Datos de prueba consistentes con el modelo de User
 const TEST_USER_1 = {
@@ -23,9 +23,10 @@ const TEST_USER_2 = {
 // =========================================================================
 beforeAll(async () => {
     try {
-        await sequelize.sync({ force: true });
+        // Usar initDB con force para asegurar limpieza en tests
+        await initDB({ sync: true, force: true });
     } catch (e) {
-        console.error('Error in beforeAll sequelize.sync:', e.message);
+        console.error('Error in beforeAll initDB:', e.message);
         throw e;
     }
 });
