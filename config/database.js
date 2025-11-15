@@ -1,14 +1,31 @@
+// config/database.js (¡Este es el de la CARPETA!)
+
 const { Sequelize } = require('sequelize');
-const path = require('path');
 
-// Ruta por defecto para el archivo sqlite (puede sobrescribirse con DB_STORAGE)
-// En tests, usar base en memoria para evitar problemas de concurrencia/locking
-const storagePath = process.env.DB_STORAGE || (process.env.NODE_ENV === 'test' ? ':memory:' : path.join(__dirname, '..', 'database.db'));
-
+// Configuración de la base de datos
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: storagePath,
-  logging: false,
+  storage: process.env.NODE_ENV === 'test' ? ':memory:' : './database/db.sqlite',
+  logging: false, // Desactiva el logging de SQL en la consola
 });
 
-module.exports = sequelize;
+// Función para inicializar la base de datos
+const initializeDatabase = async () => {
+  try {
+    await sequelize.authenticate();
+    if (process.env.NODE_ENV !== 'test') {
+      console.log('Conexión a la base de datos establecida correctamente.');
+    }
+    // Sincronizar modelos (¡Importante! Esto crea las tablas si no existen)
+    await sequelize.sync({ force: false }); // force: false para no borrar datos
+  } catch (error) {
+    console.error('No se pudo conectar a la base de datos:', error);
+  }
+};
+
+// Al final de config/database.js
+
+module.exports = {
+  sequelize,
+  initializeDatabase
+};

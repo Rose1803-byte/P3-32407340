@@ -1,47 +1,36 @@
-const sequelize = require('../config/database');
-const User = require('./users');
-const Category = require('./category');
-const Tag = require('./tag');
-const Product = require('./product');
+// models/index.js (¡El Código Corregido y Completo!)
 
-// --- Asociaciones (Category, Tag, Product)
-// Product -> Category (one category has many products)
-if (Product && Category) {
-  Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
-  Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' });
-}
+'use strict';
+// ¡¡ESTA ES LA LÍNEA CLAVE DEL ERROR!!
+const { sequelize } = require('../config/database.js'); // ¡¡Con llaves!!
+const { DataTypes } = require('sequelize');
 
-// Product <-> Tag (many-to-many)
-if (Product && Tag) {
-  Product.belongsToMany(Tag, { through: 'ProductTags', as: 'tags', foreignKey: 'productId', otherKey: 'tagId', timestamps: false });
-  Tag.belongsToMany(Product, { through: 'ProductTags', as: 'products', foreignKey: 'tagId', otherKey: 'productId', timestamps: false });
-}
+// Importar todos los modelos
+const User = require('./users.js')(sequelize, DataTypes);
+const Category = require('./category.js')(sequelize, DataTypes);
+const Tag = require('./tag.js')(sequelize, DataTypes);
+const Product = require('./product.js')(sequelize, DataTypes);
 
-// Inicializa la conexión y sincroniza los modelos
-async function initDB(options = { sync: true, force: false }) {
-  try {
-    await sequelize.authenticate();
-    if (options.sync) {
-      // Pasar force cuando se indique (útil en tests)
-      await sequelize.sync({ force: !!options.force });
-    }
-    // Evitar logs durante los tests para que Jest no reciba logs después de finalizar
-    if (process.env.NODE_ENV !== 'test') {
-      console.log('Sequelize conectado y modelos sincronizados.');
-    }
-  } catch (err) {
-    if (process.env.NODE_ENV !== 'test') {
-      console.error('Error al inicializar Sequelize:', err);
-    }
-    throw err;
-  }
-}
+// --- Definir Relaciones (Importante para Task 2) ---
 
-module.exports = {
-  sequelize,
+// 1. Un Producto pertenece a una Categoría
+Category.hasMany(Product, { foreignKey: 'categoryId' });
+Product.belongsTo(Category, { foreignKey: 'categoryId' });
+
+// 2. Un Producto tiene muchas Tags (Muchos-a-Muchos)
+// Creamos la tabla intermedia ProductTag
+const ProductTag = sequelize.define('ProductTag', {}, { timestamps: false });
+Product.belongsToMany(Tag, { through: ProductTag, foreignKey: 'productId' });
+Tag.belongsToMany(Product, { through: ProductTag, foreignKey: 'tagId' });
+
+// Exportar todo
+const db = {
+  sequelize, // Exportamos la instancia de sequelize
   User,
   Category,
   Tag,
   Product,
-  initDB,
+  ProductTag
 };
+
+module.exports = db;

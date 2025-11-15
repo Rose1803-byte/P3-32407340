@@ -11,6 +11,6 @@
     "noEmit": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["**/*.ts", "**/*.d.ts", "**/*.js"],
+  "include": ["**/*.ts", "**/*.d.ts", "**/*.js", "__tests__/middleware"],
   "exclude": ["node_modules", "**/__tests__/**"]
 }
