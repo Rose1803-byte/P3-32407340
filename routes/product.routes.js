@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const productRepo = require('../repositories/productRepository');
 const ProductQueryBuilder = require('../services/productQueryBuilder');
-const { authenticateToken } = require('./auth');
+const { authenticateToken } = require('./auth.routes');
 
 // Protected management endpoints
 router.post('/', authenticateToken, async (req, res) => {

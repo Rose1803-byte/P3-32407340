@@ -1,24 +1,49 @@
-// routes/index.js (Código Completo y Corregido)
-
 const express = require('express');
 const router = express.Router();
 
-// Importar todas tus rutas
-const appRoutes = require('./app.js'); // Rutas base (ping, about)
-const authRoutes = require('./auth.js');
-const userRoutes = require('./users.js');
-const categoryRoutes = require('./category.routes.js');
-const tagRoutes = require('./tag.routes.js');
-const productAdminRoutes = require('./product.routes.js');
-const productPublicRoutes = require('./productPublic.routes.js');
+// Importar todas tus rutas - CON .routes NO .router
+const rawAppRoutes = require('./app.routes');
+const rawAuthRoutes = require('./auth.routes');
+// NOTE: el archivo real es `users.routes.js` (plural). Corregimos la ruta.
+const rawUserRoutes = require('./users.routes');
+const rawCategoryRoutes = require('./category.routes');
+const rawTagRoutes = require('./tag.routes');
+const rawProductRoutes = require('./product.routes');
+
+function unwrapRoute(mod) {
+	if (!mod) return mod;
+	// Si ya es un Router (tiene .use), devolverlo
+	if (typeof mod.use === 'function') return mod;
+	// Si exportaron { router }
+	if (mod.router && typeof mod.router.use === 'function') return mod.router;
+	// Si usan export default
+	if (mod.default && typeof mod.default.use === 'function') return mod.default;
+	// Si exportaron {app, initDB} (routes/app.js), no es un router
+	return mod;
+}
+
+const appRoutes = unwrapRoute(rawAppRoutes);
+const authRoutes = unwrapRoute(rawAuthRoutes);
+const userRoutes = unwrapRoute(rawUserRoutes);
+const categoryRoutes = unwrapRoute(rawCategoryRoutes);
+const tagRoutes = unwrapRoute(rawTagRoutes);
+const productRoutes = unwrapRoute(rawProductRoutes);
 
 // Configurar las rutas
-router.use('/', appRoutes); // -> /api/ping, /api/about
-router.use('/auth', authRoutes); // -> /api/auth/login, /api/auth/register
-router.use('/users', userRoutes); // -> /api/users
-router.use('/categories', categoryRoutes); // -> /api/categories
-router.use('/tags', tagRoutes); // -> /api/tags
-router.use('/products', productAdminRoutes); // -> /api/products (admin)
-router.use('/', productPublicRoutes); // -> /api/p/:id-:slug
+// Solo montar si efectivamente son Routers, para evitar TypeError
+if (appRoutes && typeof appRoutes.use === 'function') router.use('/', appRoutes);
+if (authRoutes && typeof authRoutes.use === 'function') router.use('/auth', authRoutes);
+if (userRoutes && typeof userRoutes.use === 'function') router.use('/users', userRoutes);
+if (categoryRoutes && typeof categoryRoutes.use === 'function') router.use('/categories', categoryRoutes);
+if (tagRoutes && typeof tagRoutes.use === 'function') router.use('/tags', tagRoutes);
+if (productRoutes && typeof productRoutes.use === 'function') router.use('/products', productRoutes);
+
+// Manejador 404 para rutas del API montadas en este router (/api/...)
+router.use(function(req, res) {
+	res.status(404).json({
+		status: 'fail',
+		data: { message: `Ruta no encontrada: ${req.originalUrl}` }
+	});
+});
 
 module.exports = router;

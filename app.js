@@ -6,6 +6,7 @@ const swaggerSetup = require('./swagger-setup');
 const { initializeDatabase } = require('./config/database.js'); // <-- Ruta correcta
 const apiRoutes = require('./routes'); // <-- Importa de routes/index.js
 const { PORT } = require('./config.js'); // <-- Importa de config.js
+const productPublicRoutes = require('./routes/productPublic.routes');
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.use(express.json());
 // Rutas
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSetup));
 app.use('/api', apiRoutes); // <-- ¡Aquí se montan TODAS las rutas!
+// Ruta pública para productos (self-healing)
+app.use('/p', productPublicRoutes);
 
 // Manejador de errores
 app.use((err, req, res, next) => {

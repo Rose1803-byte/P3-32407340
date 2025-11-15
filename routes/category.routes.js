@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Category } = require('../models');
-const { authenticateToken } = require('./auth');
+const { authenticateToken } = require('./auth.routes');
 
 router.use(authenticateToken);
 

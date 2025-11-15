@@ -116,4 +116,8 @@ router.get('/me', authenticateToken, async (req, res) => {
 });
 
 
-module.exports = {router, authenticateToken};
+// Exportar el router como valor principal para que `require('./auth.routes')`
+// devuelva directamente el Router (evita el error "Router.use() requires a middleware function but got a Object").
+module.exports = router;
+// También exponer el middleware como propiedad del export (funciona con destructuring)
+module.exports.authenticateToken = authenticateToken;
