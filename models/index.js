@@ -1,36 +1,31 @@
-// models/index.js (¡El Código Corregido y Completo!)
+// models/index.js (FINAL Y CORREGIDO)
 
-'use strict';
-// ¡¡ESTA ES LA LÍNEA CLAVE DEL ERROR!!
-const { sequelize } = require('../config/database.js'); // ¡¡Con llaves!!
-const { DataTypes } = require('sequelize');
+// Importar la Clase Sequelize y DataTypes de la librería
+const { Sequelize, DataTypes } = require('sequelize'); 
+const sequelize = require('../config/database.js'); // Ya corregido: Importa la instancia DB
 
-// Importar todos los modelos
-const User = require('./users.js')(sequelize, DataTypes);
+// Cargar modelos (usando DataTypes directamente)
+const User = require('./users.js')(sequelize, DataTypes); // USANDO DataTypes EN LUGAR DE Sequelize.DataTypes
 const Category = require('./category.js')(sequelize, DataTypes);
 const Tag = require('./tag.js')(sequelize, DataTypes);
 const Product = require('./product.js')(sequelize, DataTypes);
 
-// --- Definir Relaciones (Importante para Task 2) ---
-
-// 1. Un Producto pertenece a una Categoría
+// Definir Relaciones
 Category.hasMany(Product, { foreignKey: 'categoryId' });
 Product.belongsTo(Category, { foreignKey: 'categoryId' });
 
-// 2. Un Producto tiene muchas Tags (Muchos-a-Muchos)
-// Creamos la tabla intermedia ProductTag
 const ProductTag = sequelize.define('ProductTag', {}, { timestamps: false });
 Product.belongsToMany(Tag, { through: ProductTag, foreignKey: 'productId' });
 Tag.belongsToMany(Product, { through: ProductTag, foreignKey: 'tagId' });
 
 // Exportar todo
 const db = {
-  sequelize, // Exportamos la instancia de sequelize
-  User,
-  Category,
-  Tag,
-  Product,
-  ProductTag
+ sequelize,
+ User,
+ Category,
+ Tag,
+ Product,
+ ProductTag
 };
 
 module.exports = db;

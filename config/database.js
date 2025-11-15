@@ -1,4 +1,4 @@
-// config/database.js (¡Este es el de la CARPETA!)
+
 
 const { Sequelize } = require('sequelize');
 
@@ -25,7 +25,6 @@ const initializeDatabase = async () => {
 
 // Al final de config/database.js
 
-module.exports = {
-  sequelize,
-  initializeDatabase
-};
+module.exports = sequelize;
+module.exports.initializeDatabase = initializeDatabase
+
