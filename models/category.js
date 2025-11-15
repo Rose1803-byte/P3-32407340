@@ -1,15 +1,19 @@
-// models/category.js
-'use strict';
+// models/category.js (CÓDIGO CORREGIDO: Exporta una función)
+
 module.exports = (sequelize, DataTypes) => {
-  const Category = sequelize.db('Category', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    description: {
-      type: DataTypes.TEXT
-    }
-  });
-  return Category;
+    const Category = sequelize.define('Category', {
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true
+        },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        }
+    }, {
+        tableName: 'categories',
+        timestamps: true
+    });
+    return Category;
 };
